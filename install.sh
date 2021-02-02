@@ -538,7 +538,7 @@ EOF
 
 
 # 检查ip
-	pingIP=4.tcp.ngrok.io
+	pingIP=127.0.0.1
 
 # 安装TLS
 installTLS() {
