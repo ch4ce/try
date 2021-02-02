@@ -470,18 +470,18 @@ initTLSNginxConfig() {
 		# 启动nginx
 		handleNginx start
 		echoContent yellow "\n检查IP是否设置为当前VPS"
-		#checkIP
+		checkIP
 		# 测试nginx
-		#echoContent yellow "\n检查Nginx是否正常访问"
+		echoContent yellow "\n检查Nginx是否正常访问"
 		sleep 0.5
-		#domainResult=$(curl -s "${domain}/test" | grep fjkvymb6len)
-		#if [[ -n ${domainResult} ]]; then
-			#handleNginx stop
-			#echoContent green "\n ---> Nginx配置成功"
-		#else
-			#echoContent red " ---> 无法正常访问服务器，请检测域名是否正确、域名的DNS解析以及防火墙设置是否正确--->"
-			#exit 0
-		#fi
+		domainResult=$(curl -s "${domain}/test" | grep fjkvymb6len)
+		if [[ -n ${domainResult} ]]; then
+			handleNginx stop
+			echoContent green "\n ---> Nginx配置成功"
+		else
+			echoContent red " ---> 无法正常访问服务器，请检测域名是否正确、域名的DNS解析以及防火墙设置是否正确--->"
+			exit 0
+		fi
 	fi
 }
 
@@ -536,10 +536,35 @@ EOF
 
 }
 
-
 # 检查ip
-	pingIP=127.0.0.1
+checkIP() {
+	echoContent skyBlue " ---> 检查ipv4中"
+	pingIP=$(ping -c 1 -W 1000 ${domain} | sed '2{s/[^(]*(//;s/).*//;q;}' | sed -n '$p')
+	if [[ -z $(echo "${pingIP}" | awk -F "[.]" '{print $4}') ]]; then
+		echoContent skyBlue " ---> 检查ipv6中"
+		pingIP=$(ping6 -c 1 ${domain} | sed '2{s/[^(]*(//;s/).*//;q;}' | sed -n '$p')
+		pingIPv6=${pingIP}
+	fi
 
+	if [[ -n "${pingIP}" ]]; then # && [[ `echo ${pingIP}|grep '^\([1-9]\|[1-9][0-9]\|1[0-9][0-9]\|2[0-4][0-9]\|25[0-5]\)\.\([0-9]\|[1-9][0-9]\|1[0-9][0-9]\|2[0-4][0-9]\|25[0-5]\)\.\([0-9]\|[1-9][0-9]\|1[0-9][0-9]\|2[0-4][0-9]\|25[0-5]\)\.\([0-9]\|[1-9][0-9]\|1[0-9][0-9]\|2[0-4][0-9]\|25[0-5]\)$'` ]]
+		echo
+		read -r -p "当前域名的IP为 [${pingIP}]，是否正确[y/n]？" domainStatus
+		if [[ "${domainStatus}" == "y" ]]; then
+			echoContent green "\n ---> IP确认完成"
+		else
+			echoContent red "\n ---> 1.检查Cloudflare DNS解析是否正常"
+			echoContent red " ---> 2.检查Cloudflare DNS云朵是否为灰色\n"
+			exit 0
+		fi
+	else
+		read -r -p "IP查询失败，是否重试[y/n]？" retryStatus
+		if [[ "${retryStatus}" == "y" ]]; then
+			checkIP
+		else
+			exit 0
+		fi
+	fi
+}
 # 安装TLS
 installTLS() {
 	echoContent skyBlue "\n进度  $1/${totalProgress} : 申请TLS证书\n"
