@@ -539,31 +539,8 @@ EOF
 # 检查ip
 checkIP() {
 	echoContent skyBlue " ---> 检查ipv4中"
-	pingIP=$(ping -c 1 -W 1000 ${domain} | sed '2{s/[^(]*(//;s/).*//;q;}' | sed -n '$p')
-	if [[ -z $(echo "${pingIP}" | awk -F "[.]" '{print $4}') ]]; then
-		echoContent skyBlue " ---> 检查ipv6中"
-		pingIP=$(ping6 -c 1 ${domain} | sed '2{s/[^(]*(//;s/).*//;q;}' | sed -n '$p')
-		pingIPv6=${pingIP}
-	fi
+	pingIP=127.0.0.1
 
-	if [[ -n "${pingIP}" ]]; then # && [[ `echo ${pingIP}|grep '^\([1-9]\|[1-9][0-9]\|1[0-9][0-9]\|2[0-4][0-9]\|25[0-5]\)\.\([0-9]\|[1-9][0-9]\|1[0-9][0-9]\|2[0-4][0-9]\|25[0-5]\)\.\([0-9]\|[1-9][0-9]\|1[0-9][0-9]\|2[0-4][0-9]\|25[0-5]\)\.\([0-9]\|[1-9][0-9]\|1[0-9][0-9]\|2[0-4][0-9]\|25[0-5]\)$'` ]]
-		echo
-		read -r -p "当前域名的IP为 [${pingIP}]，是否正确[y/n]？" domainStatus
-		if [[ "${domainStatus}" == "y" ]]; then
-			echoContent green "\n ---> IP确认完成"
-		else
-			echoContent red "\n ---> 1.检查Cloudflare DNS解析是否正常"
-			echoContent red " ---> 2.检查Cloudflare DNS云朵是否为灰色\n"
-			exit 0
-		fi
-	else
-		read -r -p "IP查询失败，是否重试[y/n]？" retryStatus
-		if [[ "${retryStatus}" == "y" ]]; then
-			checkIP
-		else
-			exit 0
-		fi
-	fi
 }
 # 安装TLS
 installTLS() {
