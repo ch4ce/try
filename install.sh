@@ -470,18 +470,18 @@ initTLSNginxConfig() {
 		# 启动nginx
 		handleNginx start
 		echoContent yellow "\n检查IP是否设置为当前VPS"
-		checkIP
+		#checkIP
 		# 测试nginx
-		echoContent yellow "\n检查Nginx是否正常访问"
+		#echoContent yellow "\n检查Nginx是否正常访问"
 		sleep 0.5
-		domainResult=$(curl -s "${domain}/test" | grep fjkvymb6len)
-		if [[ -n ${domainResult} ]]; then
-			handleNginx stop
-			echoContent green "\n ---> Nginx配置成功"
-		else
-			echoContent red " ---> 无法正常访问服务器，请检测域名是否正确、域名的DNS解析以及防火墙设置是否正确--->"
-			exit 0
-		fi
+		#domainResult=$(curl -s "${domain}/test" | grep fjkvymb6len)
+		#if [[ -n ${domainResult} ]]; then
+			#handleNginx stop
+			#echoContent green "\n ---> Nginx配置成功"
+		#else
+			#echoContent red " ---> 无法正常访问服务器，请检测域名是否正确、域名的DNS解析以及防火墙设置是否正确--->"
+			#exit 0
+		#fi
 	fi
 }
 
